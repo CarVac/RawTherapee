@@ -2081,7 +2081,8 @@ void RawImageSource::demosaic(const RAWParams &raw, bool autoContrast, double &c
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AHD) ) {
             ahd_demosaic ();
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZE) ) {
-            amaze_demosaic_RT (0, 0, W, H, rawData, red, green, blue);
+            unsigned cfa[2][2] = {{FC(0,0), FC(0,1)},{FC(1,0),FC(1,1)}};
+            amaze_demosaic_RT (0, 0, W, H, rawData, red, green, blue, cfa);
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZEVNG4)
                    || raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::DCBVNG4)
                    || raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::RCDVNG4)) {
