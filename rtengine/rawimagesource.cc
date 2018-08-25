@@ -18,6 +18,7 @@
  */
 #include <cmath>
 #include <iostream>
+#include <functional>
 
 #include "rtengine.h"
 #include "rawimagesource.h"
@@ -2082,7 +2083,15 @@ void RawImageSource::demosaic(const RAWParams &raw, bool autoContrast, double &c
             ahd_demosaic ();
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZE) ) {
             unsigned cfa[2][2] = {{FC(0,0), FC(0,1)},{FC(1,0),FC(1,1)}};
-            amaze_demosaic_RT (0, 0, W, H, rawData, red, green, blue, cfa);
+            if (plistener) {
+                //plistener->setProgressStr (Glib::ustring::compose(M("TP_RAW_DMETHOD_PROGRESSBAR"), RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZE)));
+                plistener->setProgress (0.0);
+            }
+            std::function<bool(double)> setProgCancel = [&](double p) -> bool {
+                plistener->setProgress(p);
+                return false;
+            };
+            amaze_demosaic_RT(0, 0, W, H, rawData, red, green, blue, cfa, setProgCancel);
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZEVNG4)
                    || raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::DCBVNG4)
                    || raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::RCDVNG4)) {

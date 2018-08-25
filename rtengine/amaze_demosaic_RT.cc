@@ -47,16 +47,19 @@ unsigned fc( unsigned cfa[2][2], unsigned row, unsigned col)
 namespace rtengine
 {
 
-void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, const array2D<float> &rawData, array2D<float> &red, array2D<float> &green, array2D<float> &blue, unsigned cfarray[2][2])
+void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, const array2D<float> &rawData, array2D<float> &red, array2D<float> &green, array2D<float> &blue, unsigned cfarray[2][2], std::function<bool(double)> setProgCancel)
 {
     BENCHFUN
 
     volatile double progress = 0.0;
 
+    /*
     if (plistener) {
         plistener->setProgressStr (Glib::ustring::compose(M("TP_RAW_DMETHOD_PROGRESSBAR"), RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZE)));
         plistener->setProgress (0.0);
     }
+    */
+    setProgCancel(progress);
 
     const int width = winw, height = winh;
     const float clip_pt = 1.0 / initialGain;
@@ -1573,7 +1576,8 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                     }
                 }
 
-                if(plistener) {
+                //if(plistener) {
+                if(true) {
                     progresscounter++;
 
                     if(progresscounter % 32 == 0) {
@@ -1583,7 +1587,7 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                         {
                             progress += (double)32 * ((ts - 32) * (ts - 32)) / (height * width);
                             progress = progress > 1.0 ? 1.0 : progress;
-                            plistener->setProgress(progress);
+                            setProgCancel(progress);
                         }
                     }
                 }
@@ -1597,8 +1601,9 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
         border_interpolate2(W, H, 3, rawData, red, green, blue);
     }
 
-    if(plistener) {
-        plistener->setProgress(1.0);
+    //if(plistener) {
+    if(true) {
+        setProgCancel(1.0);
     }
 
 }
