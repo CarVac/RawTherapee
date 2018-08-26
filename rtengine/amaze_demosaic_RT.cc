@@ -47,7 +47,7 @@ unsigned fc( unsigned cfa[2][2], unsigned row, unsigned col)
 namespace rtengine
 {
 
-void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, const array2D<float> &rawData, array2D<float> &red, array2D<float> &green, array2D<float> &blue, unsigned cfarray[2][2], std::function<bool(double)> setProgCancel)
+void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, const array2D<float> &rawData, array2D<float> &red, array2D<float> &green, array2D<float> &blue, unsigned cfarray[2][2], std::function<bool(double)> setProgCancel, double initGain)
 {
     BENCHFUN
 
@@ -62,8 +62,8 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
     setProgCancel(progress);
 
     const int width = winw, height = winh;
-    const float clip_pt = 1.0 / initialGain;
-    const float clip_pt8 = 0.8 / initialGain;
+    const float clip_pt = 1.0 / initGain;
+    const float clip_pt8 = 0.8 / initGain;
 
 // this allows to pass AMAZETS to the code. On some machines larger AMAZETS is faster
 // If AMAZETS is undefined it will be set to 160, which is the fastest on modern x86/64 machines
