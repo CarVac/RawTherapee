@@ -26,7 +26,6 @@
 //
 ////////////////////////////////////////////////////////////////
 
-#include "rtengine.h"
 #include "rawimagesource.h"
 #include "rt_math.h"
 #include "sleef.c"
