@@ -1596,7 +1596,7 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
         free(buffer);
     }
     if(border < 4) {
-        border_interpolate2(W, H, 3, rawData, red, green, blue);
+        border_interpolate2(W, H, 3, rawData, red, green, blue, cfarray);
     }
 
     //if(plistener) {

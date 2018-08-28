@@ -318,7 +318,9 @@ void RawImageSource::hphd_demosaic ()
         }
     }
 
-    border_interpolate2(W, H, 4, rawData, red, green, blue);
+    unsigned cfa[2][2] = {{FC(0,0), FC(0,1)},{FC(1,0),FC(1,1)}};
+
+    border_interpolate2(W, H, 4, rawData, red, green, blue, cfa);
 
     if (plistener) {
         plistener->setProgress (1.0);
@@ -482,160 +484,6 @@ void RawImageSource::border_interpolate(unsigned int border, float (*image)[4], 
         }
 }
 
-void RawImageSource::border_interpolate2( int winw, int winh, int lborders, const array2D<float> &rawData, array2D<float> &red, array2D<float> &green, array2D<float> &blue)
-{
-    int bord = lborders;
-    int width = winw;
-    int height = winh;
-
-    for (int i = 0; i < height; i++) {
-
-        float sum[6];
-
-        for (int j = 0; j < bord; j++) { //first few columns
-            for (int c = 0; c < 6; c++) {
-                sum[c] = 0;
-            }
-
-            for (int i1 = i - 1; i1 < i + 2; i1++)
-                for (int j1 = j - 1; j1 < j + 2; j1++) {
-                    if ((i1 > -1) && (i1 < height) && (j1 > -1)) {
-                        int c = FC(i1, j1);
-                        sum[c] += rawData[i1][j1];
-                        sum[c + 3]++;
-                    }
-                }
-
-            int c = FC(i, j);
-
-            if (c == 1) {
-                red[i][j] = sum[0] / sum[3];
-                green[i][j] = rawData[i][j];
-                blue[i][j] = sum[2] / sum[5];
-            } else {
-                green[i][j] = sum[1] / sum[4];
-
-                if (c == 0) {
-                    red[i][j] = rawData[i][j];
-                    blue[i][j] = sum[2] / sum[5];
-                } else {
-                    red[i][j] = sum[0] / sum[3];
-                    blue[i][j] = rawData[i][j];
-                }
-            }
-        }//j
-
-        for (int j = width - bord; j < width; j++) { //last few columns
-            for (int c = 0; c < 6; c++) {
-                sum[c] = 0;
-            }
-
-            for (int i1 = i - 1; i1 < i + 2; i1++)
-                for (int j1 = j - 1; j1 < j + 2; j1++) {
-                    if ((i1 > -1) && (i1 < height ) && (j1 < width)) {
-                        int c = FC(i1, j1);
-                        sum[c] += rawData[i1][j1];
-                        sum[c + 3]++;
-                    }
-                }
-
-            int c = FC(i, j);
-
-            if (c == 1) {
-                red[i][j] = sum[0] / sum[3];
-                green[i][j] = rawData[i][j];
-                blue[i][j] = sum[2] / sum[5];
-            } else {
-                green[i][j] = sum[1] / sum[4];
-
-                if (c == 0) {
-                    red[i][j] = rawData[i][j];
-                    blue[i][j] = sum[2] / sum[5];
-                } else {
-                    red[i][j] = sum[0] / sum[3];
-                    blue[i][j] = rawData[i][j];
-                }
-            }
-        }//j
-    }//i
-
-    for (int i = 0; i < bord; i++) {
-
-        float sum[6];
-
-        for (int j = bord; j < width - bord; j++) { //first few rows
-            for (int c = 0; c < 6; c++) {
-                sum[c] = 0;
-            }
-
-            for (int i1 = i - 1; i1 < i + 2; i1++)
-                for (int j1 = j - 1; j1 < j + 2; j1++) {
-                    if ((i1 > -1) && (i1 < height) && (j1 > -1)) {
-                        int c = FC(i1, j1);
-                        sum[c] += rawData[i1][j1];
-                        sum[c + 3]++;
-                    }
-                }
-
-            int c = FC(i, j);
-
-            if (c == 1) {
-                red[i][j] = sum[0] / sum[3];
-                green[i][j] = rawData[i][j];
-                blue[i][j] = sum[2] / sum[5];
-            } else {
-                green[i][j] = sum[1] / sum[4];
-
-                if (c == 0) {
-                    red[i][j] = rawData[i][j];
-                    blue[i][j] = sum[2] / sum[5];
-                } else {
-                    red[i][j] = sum[0] / sum[3];
-                    blue[i][j] = rawData[i][j];
-                }
-            }
-        }//j
-    }
-
-    for (int i = height - bord; i < height; i++) {
-
-        float sum[6];
-
-        for (int j = bord; j < width - bord; j++) { //last few rows
-            for (int c = 0; c < 6; c++) {
-                sum[c] = 0;
-            }
-
-            for (int i1 = i - 1; i1 < i + 2; i1++)
-                for (int j1 = j - 1; j1 < j + 2; j1++) {
-                    if ((i1 > -1) && (i1 < height) && (j1 < width)) {
-                        int c = FC(i1, j1);
-                        sum[c] += rawData[i1][j1];
-                        sum[c + 3]++;
-                    }
-                }
-
-            int c = FC(i, j);
-
-            if (c == 1) {
-                red[i][j] = sum[0] / sum[3];
-                green[i][j] = rawData[i][j];
-                blue[i][j] = sum[2] / sum[5];
-            } else {
-                green[i][j] = sum[1] / sum[4];
-
-                if (c == 0) {
-                    red[i][j] = rawData[i][j];
-                    blue[i][j] = sum[2] / sum[5];
-                } else {
-                    red[i][j] = sum[0] / sum[3];
-                    blue[i][j] = rawData[i][j];
-                }
-            }
-        }//j
-    }
-
-}
 
 // Joint Demosaicing and Denoising using High Order Interpolation Techniques
 // Revision 0.9.1a - 09/02/2010 - Contact info: luis.sanz.rodriguez@gmail.com
@@ -1425,7 +1273,9 @@ void RawImageSource::igv_interpolate(int winw, int winh)
     chr[2] = hdif;
     chr[3] = vdif;
 
-    border_interpolate2(winw, winh, 7, rawData, red, green, blue);
+    unsigned cfa[2][2] = {{FC(0,0), FC(0,1)},{FC(1,0),FC(1,1)}};
+
+    border_interpolate2(winw, winh, 7, rawData, red, green, blue, cfa);
 
     if (plistener) {
         plistener->setProgressStr (Glib::ustring::compose(M("TP_RAW_DMETHOD_PROGRESSBAR"), RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::IGV)));
@@ -1815,7 +1665,9 @@ void RawImageSource::igv_interpolate(int winw, int winh)
     vdif  = (float (*))    calloc(width * height / 2, sizeof * vdif);
     hdif  = (float (*))    calloc(width * height / 2, sizeof * hdif);
 
-    border_interpolate2(winw, winh, 7, rawData, red, green, blue);
+    unsigned cfa[2][2] = {{FC(0,0), FC(0,1)},{FC(1,0),FC(1,1)}};
+
+    border_interpolate2(winw, winh, 7, rawData, red, green, blue, cfa);
 
     if (plistener) {
         plistener->setProgressStr (Glib::ustring::compose(M("TP_RAW_DMETHOD_PROGRESSBAR"), RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::IGV)));

@@ -34,6 +34,7 @@ set(RTENGINESOURCEFILES
     PF_correct_RT.cc
     ahd_demosaic_RT.cc
     amaze_demosaic_RT.cc
+    border_interpolate2.cc
     cJSON.c
     calc_distort.cc
     camconst.cc

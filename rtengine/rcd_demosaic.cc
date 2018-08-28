@@ -291,7 +291,9 @@ void RawImageSource::rcd_demosaic()
     free(PQ_Dir);
 }
 
-    border_interpolate2(W, H, rcdBorder, rawData, red, green, blue);
+    unsigned cfa[2][2] = {{FC(0,0), FC(0,1)},{FC(1,0),FC(1,1)}};
+
+    border_interpolate2(W, H, rcdBorder, rawData, red, green, blue, cfa);
 
     if (plistener) {
         plistener->setProgress(1);
