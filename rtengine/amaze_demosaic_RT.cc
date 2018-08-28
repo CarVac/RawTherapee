@@ -45,7 +45,7 @@ unsigned fc( unsigned cfa[2][2], unsigned row, unsigned col)
 namespace rtengine
 {
 
-void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, const array2D<float> &rawData, array2D<float> &red, array2D<float> &green, array2D<float> &blue, unsigned cfarray[2][2], std::function<bool(double)> setProgCancel, double initGain)
+void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, const array2D<float> &rawData, array2D<float> &red, array2D<float> &green, array2D<float> &blue, unsigned cfarray[2][2], std::function<bool(double)> setProgCancel, double initGain, int border, int W, int H)
 {
     BENCHFUN
 

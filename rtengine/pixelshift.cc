@@ -308,7 +308,7 @@ BENCHFUN
             plistener->setProgress(p);
             return false;
         };
-        amaze_demosaic_RT(winx, winy, winw, winh, rawData, red, green, blue, cfa, setProgCancel, initialGain);
+        amaze_demosaic_RT(winx, winy, winw, winh, rawData, red, green, blue, cfa, setProgCancel, initialGain, border, W, H);
         return;
     }
 
@@ -345,7 +345,7 @@ BENCHFUN
                         plistener->setProgress(p);
                         return false;
                     };
-                    amaze_demosaic_RT(winx, winy, winw, winh, *(rawDataFrames[0]), red, green, blue, cfa, setProgCancel, initialGain);
+                    amaze_demosaic_RT(winx, winy, winw, winh, *(rawDataFrames[0]), red, green, blue, cfa, setProgCancel, initialGain, border, W, H);
                 }
                 multi_array2D<float, 3> redTmp(winw, winh);
                 multi_array2D<float, 3> greenTmp(winw, winh);
@@ -365,7 +365,7 @@ BENCHFUN
                             plistener->setProgress(p);
                             return false;
                         };
-                        amaze_demosaic_RT(winx, winy, winw, winh, *(rawDataFrames[i + 1]), redTmp[i], greenTmp[i], blueTmp[i], cfa, setProgCancel, initialGain);
+                        amaze_demosaic_RT(winx, winy, winw, winh, *(rawDataFrames[i + 1]), redTmp[i], greenTmp[i], blueTmp[i], cfa, setProgCancel, initialGain, border, W, H);
                     }
                 }
 
@@ -402,7 +402,7 @@ BENCHFUN
                         plistener->setProgress(p);
                         return false;
                     };
-                    amaze_demosaic_RT(winx, winy, winw, winh, rawData, red, green, blue, cfa, setProgCancel, initialGain);
+                    amaze_demosaic_RT(winx, winy, winw, winh, rawData, red, green, blue, cfa, setProgCancel, initialGain, border, W, H);
                 }
             }
         }
