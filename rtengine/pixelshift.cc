@@ -304,7 +304,7 @@ BENCHFUN
             plistener->setProgressStr (Glib::ustring::compose(M("TP_RAW_DMETHOD_PROGRESSBAR"), RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZE)));
             plistener->setProgress (0.0);
         }
-        std::function<bool(double)> setProgCancel = [&](double p) -> bool {
+        std::function<bool(double)> setProgCancel = [this](double p) -> bool {
             plistener->setProgress(p);
             return false;
         };
@@ -341,7 +341,7 @@ BENCHFUN
                         plistener->setProgressStr (Glib::ustring::compose(M("TP_RAW_DMETHOD_PROGRESSBAR"), RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZE)));
                         plistener->setProgress (0.0);
                     }
-                    std::function<bool(double)> setProgCancel = [&](double p) -> bool {
+                    std::function<bool(double)> setProgCancel = [this](double p) -> bool {
                         plistener->setProgress(p);
                         return false;
                     };
@@ -361,7 +361,7 @@ BENCHFUN
                             plistener->setProgressStr (Glib::ustring::compose(M("TP_RAW_DMETHOD_PROGRESSBAR"), RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZE)));
                             plistener->setProgress (0.0);
                         }
-                        std::function<bool(double)> setProgCancel = [&](double p) -> bool {
+                        std::function<bool(double)> setProgCancel = [this](double p) -> bool {
                             plistener->setProgress(p);
                             return false;
                         };
@@ -398,7 +398,7 @@ BENCHFUN
                         plistener->setProgressStr (Glib::ustring::compose(M("TP_RAW_DMETHOD_PROGRESSBAR"), RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZE)));
                         plistener->setProgress (0.0);
                     }
-                    std::function<bool(double)> setProgCancel = [&](double p) -> bool {
+                    std::function<bool(double)> setProgCancel = [this](double p) -> bool {
                         plistener->setProgress(p);
                         return false;
                     };
