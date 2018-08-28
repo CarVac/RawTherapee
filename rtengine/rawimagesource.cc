@@ -449,17 +449,6 @@ RawImageSource::RawImageSource ()
     , camInitialGain(0.0)
     , defGain(0.0)
     , ri(nullptr)
-    , lc00(0.0)
-    , lc01(0.0)
-    , lc02(0.0)
-    , lc10(0.0)
-    , lc11(0.0)
-    , lc12(0.0)
-    , lc20(0.0)
-    , lc21(0.0)
-    , lc22(0.0)
-    , cache(nullptr)
-    , threshold(0)
     , rawData(0, 0)
     , green(0, 0)
     , red(0, 0)
@@ -491,10 +480,6 @@ RawImageSource::~RawImageSource ()
 
     flushRGB();
     flushRawData();
-
-    if( cache ) {
-        delete [] cache;
-    }
 
     if (camProfile) {
         cmsCloseProfile (camProfile);
@@ -2826,11 +2811,6 @@ void RawImageSource::retinex(const ColorManagementParams& cmp, const RetinexPara
 
 void RawImageSource::flushRawData()
 {
-    if(cache) {
-        delete [] cache;
-        cache = nullptr;
-    }
-
     if (rawData) {
         rawData(0, 0);
     }
@@ -4613,7 +4593,7 @@ void RawImageSource::HLRecovery_CIELab (float* rin, float* gin, float* bin, floa
             float bo = min(b, maxval);
             float yy = xyz_cam[1][0] * r + xyz_cam[1][1] * g + xyz_cam[1][2] * b;
             float fy = (yy < 65535.0 ? Color::cachef[yy] / 327.68 : std::cbrt(yy / MAXVALD));
-            // compute LCH decompostion of the clipped pixel (only color information, thus C and H will be used)
+            // compute LCH decomposition of the clipped pixel (only color information, thus C and H will be used)
             float x = xyz_cam[0][0] * ro + xyz_cam[0][1] * go + xyz_cam[0][2] * bo;
             float y = xyz_cam[1][0] * ro + xyz_cam[1][1] * go + xyz_cam[1][2] * bo;
             float z = xyz_cam[2][0] * ro + xyz_cam[2][1] * go + xyz_cam[2][2] * bo;
@@ -4750,10 +4730,10 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
     histRedRaw.clear();
     histGreenRaw.clear();
     histBlueRaw.clear();
-    const float mult[4] = { 65535.0f / ri->get_white(0),
-                            65535.0f / ri->get_white(1),
-                            65535.0f / ri->get_white(2),
-                            65535.0f / ri->get_white(3)
+    const float mult[4] = { 255.0f / Color::gamma(ri->get_white(0) - cblacksom[0]),
+                            255.0f / Color::gamma(ri->get_white(1) - cblacksom[1]),
+                            255.0f / Color::gamma(ri->get_white(2) - cblacksom[2]),
+                            255.0f / Color::gamma(ri->get_white(3) - cblacksom[3])
                           };
 
     const bool fourColours = ri->getSensorType() == ST_BAYER && ((mult[1] != mult[3] || cblacksom[1] != cblacksom[3]) || FC(0, 0) == 3 || FC(0, 1) == 3 || FC(1, 0) == 3 || FC(1, 1) == 3);
@@ -4859,23 +4839,22 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
         } // end of critical region
     } // end of parallel region
 
-    constexpr float gammaLimit = 32767.f * 65536.f; // Color::gamma overflows when the LUT is accessed with too large values
     for(int i = 0; i < 65536; i++) {
         int idx;
-        idx = CLIP((int)Color::gamma(std::min(mult[0] * (i - (cblacksom[0]/*+black_lev[0]*/)), gammaLimit)));
-        histRedRaw[idx >> 8] += hist[0][i];
+        idx = (int)std::min(255.0f, mult[0] * Color::gamma(std::max(0.0f, i - cblacksom[0])));
+        histRedRaw[idx] += hist[0][i];
 
         if (ri->get_colors() > 1) {
-            idx = CLIP((int)Color::gamma(std::min(mult[1] * (i - (cblacksom[1]/*+black_lev[1]*/)), gammaLimit)));
-            histGreenRaw[idx >> 8] += hist[1][i];
+            idx = (int)std::min(255.0f, mult[1] * Color::gamma(std::max(0.0f, i - cblacksom[1])));
+            histGreenRaw[idx] += hist[1][i];
 
             if (fourColours) {
-                idx = CLIP((int)Color::gamma(std::min(mult[3] * (i - (cblacksom[3]/*+black_lev[3]*/)), gammaLimit)));
-                histGreenRaw[idx >> 8] += hist[3][i];
+                idx = (int)std::min(255.0f, mult[3] * Color::gamma(std::max(0.0f, i - cblacksom[3])));
+                histGreenRaw[idx] += hist[3][i];
             }
 
-            idx = CLIP((int)Color::gamma(std::min(mult[2] * (i - (cblacksom[2]/*+black_lev[2]*/)), gammaLimit)));
-            histBlueRaw[idx >> 8] += hist[2][i];
+            idx = (int)std::min(255.0f, mult[2] * Color::gamma(std::max(0.0f, i - cblacksom[2])));
+            histBlueRaw[idx] += hist[2][i];
         }
     }
 

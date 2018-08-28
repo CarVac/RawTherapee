@@ -4077,24 +4077,22 @@ void ImProcFunctions::labtoning (float r, float g, float b, float &ro, float &go
 
     // get the opacity and tweak it to preserve saturated colors
     //float l_ = Color::gamma_srgb(l*65535.f)/65535.f;
-    float opacity;
-    opacity = (1.f - min<float> (s / satLimit, 1.f) * (1.f - satLimitOpacity)) * ctOpacityCurve.lutOpacityCurve[l * 500.f];
+    float opacity = (1.f - min<float> (s / satLimit, 1.f) * (1.f - satLimitOpacity)) * ctOpacityCurve.lutOpacityCurve[l * 500.f];
     float opacity2 = (1.f - min<float> (s / satLimit, 1.f) * (1.f - satLimitOpacity));
 
-    //float ro, go, bo;
-    float lm = l;
-    float chromat, luma;
+    l *= 65535.f;
+    float chromat = 0.f, luma = 0.f;
 
-    if (clToningcurve[lm * 65535.f] / (lm * 65535.f) < 1.f) {
-        chromat = (clToningcurve[ (lm) * 65535.f] / (lm * 65535.f)) - 1.f;  //special effect
-    } else {
-        chromat = 1.f - SQR (SQR ((lm * 65535.f) / clToningcurve[ (lm) * 65535.f])); //apply C=f(L) acts  on 'a' and 'b'
+    if (clToningcurve[l] < l) {
+        chromat = clToningcurve[l] / l - 1.f;  //special effect
+    } else if (clToningcurve[l] > l) {
+        chromat = 1.f - SQR(SQR(l / clToningcurve[l])); //apply C=f(L) acts  on 'a' and 'b'
     }
 
-    if (cl2Toningcurve[lm * 65535.f] / (lm * 65535.f) < 1.f) {
-        luma = (cl2Toningcurve[ (lm) * 65535.f] / (lm * 65535.f)) - 1.f;  //special effect
-    } else {
-        luma = 1.f - SQR (SQR ((lm * 65535.f) / (cl2Toningcurve[ (lm) * 65535.f]))); //apply C2=f(L) acts only on 'b'
+    if (cl2Toningcurve[l] < l) {
+        luma = cl2Toningcurve[l] / l - 1.f;  //special effect
+    } else if (cl2Toningcurve[l] > l) {
+        luma = 1.f - SQR(SQR(l / cl2Toningcurve[l])); //apply C2=f(L) acts only on 'b'
     }
 
     if (algm == 1) {
@@ -4125,21 +4123,9 @@ void ImProcFunctions::luminanceCurve (LabImage* lold, LabImage* lnew, LUTf & cur
 
 void ImProcFunctions::chromiLuminanceCurve (PipetteBuffer *pipetteBuffer, int pW, LabImage* lold, LabImage* lnew, LUTf & acurve, LUTf & bcurve, LUTf & satcurve, LUTf & lhskcurve, LUTf & clcurve, LUTf & curve, bool utili, bool autili, bool butili, bool ccutili, bool cclutili, bool clcutili, LUTu &histCCurve, LUTu &histLCurve)
 {
-    if (!params->labCurve.enabled) {
-        if (params->blackwhite.enabled && !params->colorToning.enabled) {
-            for (int i = 0; i < lnew->H; ++i) {
-                for (int j = 0; j < lnew->W; ++j) {
-                    lnew->a[i][j] = lnew->b[i][j] = 0.f;
-                }
-            }
-        }
-        return;
-    }
-    
+
     int W = lold->W;
     int H = lold->H;
-    // lhskcurve.dump("lh_curve");
-    //init Flatcurve for C=f(H)
 
     PlanarWhateverData<float>* editWhatever = nullptr;
     EditUniqueID editID = EUID_None;
@@ -4164,6 +4150,25 @@ void ImProcFunctions::chromiLuminanceCurve (PipetteBuffer *pipetteBuffer, int pW
             }
         }
     }
+
+    if (!params->labCurve.enabled) {
+        if (editPipette && (editID == EUID_Lab_LCurve || editID == EUID_Lab_aCurve || editID == EUID_Lab_bCurve || editID == EUID_Lab_LHCurve || editID == EUID_Lab_CHCurve || editID == EUID_Lab_HHCurve || editID == EUID_Lab_CLCurve || editID == EUID_Lab_CCurve || editID == EUID_Lab_LCCurve)) {
+            // fill pipette buffer with zeros to avoid crashes
+            editWhatever->fill(0.f);
+        }
+        if (params->blackwhite.enabled && !params->colorToning.enabled) {
+            for (int i = 0; i < lnew->H; ++i) {
+                for (int j = 0; j < lnew->W; ++j) {
+                    lnew->a[i][j] = lnew->b[i][j] = 0.f;
+                }
+            }
+        }
+        return;
+    }
+
+    // lhskcurve.dump("lh_curve");
+    //init Flatcurve for C=f(H)
+
 
     FlatCurve* chCurve = nullptr;// curve C=f(H)
     bool chutili = false;
